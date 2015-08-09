@@ -1,0 +1,39 @@
+﻿@model AnotherShopping.Models.CartGuiModel
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Index</h2>
+@using (Html.BeginForm("ValidateCommand", "PayPal"))
+{
+    <div>
+        <table >
+            <tr>
+                <td>
+                    product Name:
+                </td>
+                <td>
+                    <input type="text" name="product" value="@Model.Product.ProductName" readonly />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                   Total Price:
+                </td>
+                <td>
+                    @* 商品单价x商品数量=总价 *@
+                    $<input type="text" name="totalPrice" value="@{ var value = Model.Product.ProductPrice * Model.Count; @value }" readonly />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                </td>
+                <td>
+                    <input type="submit" name="btnConfirm" value="Check Out with Paypal" />
+                </td>
+            </tr>
+        </table>
+    </div>
+}

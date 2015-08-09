@@ -1,0 +1,58 @@
+﻿@model AnotherShopping.Models.ProductModels
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<fieldset>
+    <legend>ProductModels</legend>
+
+    <div class="display-label">
+         @Html.DisplayNameFor(model => model.ProductName)
+    </div>
+    <div class="display-field">
+        @Html.DisplayFor(model => model.ProductName)
+    </div>
+
+    <div class="display-label">
+         @Html.DisplayNameFor(model => model.ProductImage)
+    </div>
+    <div class="display-field">
+            <img src="@Html.DisplayFor(model => model.ProductImage)" />
+    </div>
+
+    <div class="display-label">
+         @Html.DisplayNameFor(model => model.ProductPrice)
+    </div>
+    <div class="display-field">
+        @Html.DisplayFor(model => model.ProductPrice)
+    </div>
+
+    <div class="display-label">
+         @Html.DisplayNameFor(model => model.ProductAvailable)
+    </div>
+    <div class="display-field">
+        @Html.DisplayFor(model => model.ProductAvailable)
+    </div>
+
+    <div class="display-label">
+         @Html.DisplayNameFor(model => model.ProductDetails)
+    </div>
+    <div class="display-field">
+        @Html.DisplayFor(model => model.ProductDetails)
+    </div>
+
+    <div class="display-label">
+         @Html.DisplayNameFor(model => model.CreatedTime)
+    </div>
+    <div class="display-field">
+        @Html.DisplayFor(model => model.CreatedTime)
+    </div>
+</fieldset>
+<p>
+    @Html.ActionLink("Add to Cart", "AddToCart", new { id=Model.ProductId }) |
+    @Html.ActionLink("Edit", "Edit", new { id=Model.ProductId }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

@@ -1,0 +1,275 @@
+﻿@model AnotherShopping.Models.ProductModels
+
+@{
+    ViewBag.Title = "Create";
+}
+
+<h2>Create</h2>
+
+<div id="fb-root"></div>
+
+<script>
+    //facebook 应用 id，使用facebook开发者账户申请的
+    var APP_ID = "722377221189156";
+
+    //调用facebook sdk初始化函数
+    window.fbAsyncInit = initFacebook;
+
+    //facebook sdk初始化函数
+    function initFacebook() {
+        FB.init({
+            appId: APP_ID,
+            status: true, // check login status
+            cookie: false, // enable cookies to allow the server to access the session
+            xfbml: true  // parse XFBML
+        });
+
+        FB.getLoginStatus(onFacebookLoginStatus);
+    };
+
+    //加载facebook sdk，http://connect.facebook.net/en_US/all.js 就是真正的facebook sdk来源
+    (function () {
+        var e = document.createElement('script');
+        e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
+        e.async = true;
+        document.getElementById('fb-root').appendChild(e);
+    }());
+
+
+    //使用facebook sdk登出当前facebook帐号
+    function facebookLogout() {
+        FB.logout();
+        var loginButtonDiv = document.getElementById("fb-login-button-div");
+        loginButtonDiv.style.display = "block";
+        var logoutButtonDiv = document.getElementById("fb-logout-button-div");
+        logoutButtonDiv.style.display = "none";
+        var contentDiv = document.getElementById("user-is-authenticated-div");
+        contentDiv.style.display = "none";
+    }
+
+    //使用facebook sdk登录facebook帐号
+    function facebookLogin() {
+        var loginUrl = "http://www.facebook.com/dialog/oauth/?" +
+			//"scope=publish_stream&" +
+			"scope=publish_actions&" +
+			"client_id=" + APP_ID + "&" +
+			"redirect_uri=" + document.location.href + "&" +
+			"response_type=token";
+        window.location = loginUrl;
+    }
+
+    /*
+	* Callback function for FB.login
+	*/
+    //如果登录facebook成功，则隐藏登录facebook按钮
+    function onFacebookLoginStatus(response) {
+        if (response.status == "connected" && response.authResponse) {
+            var loginButtonDiv = document.getElementById("fb-login-button-div");
+            loginButtonDiv.style.display = "none";
+            var logoutButtonDiv = document.getElementById("fb-logout-button-div");
+            logoutButtonDiv.style.display = "block";
+            var contentDiv = document.getElementById("user-is-authenticated-div");
+            contentDiv.style.display = "block";
+
+        }
+        else {
+            var loginButtonDiv = document.getElementById("fb-login-button-div");
+            loginButtonDiv.style.display = "block";
+            var contentDiv = document.getElementById("user-is-authenticated-div");
+            contentDiv.style.display = "none";
+        }
+
+    }
+
+    //将内容发送到facebook, 参数puid是唯一标识商品的id，参数coupon是优惠券号码
+    function postToWallUsingFBApi(puid, coupon) {
+
+        //从文本框取得商品信息：商品名、价格、图片、描述
+        var message = $("#ProductName").val();
+        var caption = $( "#ProductPrice" ).val();
+        var name = $( "#ProductName" ).val();
+        var picture = $( "#ProductImage" ).val();
+        var description = $("#ProductDetails").val();
+
+        //将此链接发到facebook上，用户点击此链接将来到购买此商品的页面，puid指定是那个商品，coupon指定让此商品价格优惠
+        var link = "http://localhost:49570/PayPal/Index/" + puid + "|" + coupon;
+
+        //将要发的内容组合成一个变量
+        var data =
+		{
+		    message: message,
+		    display: 'iframe',
+		    caption: caption,
+		    name: name,
+		    picture: picture,
+		    link: link,  // Go here if user click the picture
+		    description: description,
+		    actions: [{ name: message, link: link }],
+		}
+
+        //用facebook sdk发帖
+        FB.api('/me/feed', 'post', data, onPostToWallCompleted);
+    }
+
+    //没有用到，与postToWallUsingFBApi作用类似，只是会多弹出一个facebook输入框
+    function postToWallUsingFBUiAndAttachment() {
+        var data =
+		{
+		    method: 'stream.publish',
+		    message: "Posted using FB.ui.",
+		    display: 'iframe',
+		    attachment:
+			{
+			    media: [{
+			        type: "image",
+			        src: 'http://www.permadi.com/tutorial/facebook-js-graph-api-post-to-wall/permadi.png',
+			        href: "http://www.permadi.com/"  // Go here if user click the picture
+			    }],
+			    name: "Attachment Name",
+			    caption: 'Attachment Caption',
+			    href: "http://www.permadi.com/"			// Go here is user clicks the Attachment Name
+			},
+		    href: "http://www.permadi.com/",
+		    action_links: [
+                { text: 'action_links text!', href: 'http://www.permadi.com' }
+		    ],
+		}
+        FB.ui(data, onPostToWallCompleted);
+    }
+
+    //没有用到，与postToWallUsingFBApi作用类似，只是会多弹出一个facebook输入框
+    function postToWallUsingFBUi() {
+        var data =
+		{
+		    method: 'stream.publish',
+		    message: "Posted using FB.ui and picture.",
+		    display: 'iframe',
+		    caption: "Caption",
+		    name: "Name",
+		    picture: 'http://www.permadi.com/tutorial/facebook-js-graph-api-post-to-wall/permadi.png',
+		    link: "http://www.permadi.com/",  // Go here if user click the picture
+		    description: "Description field",
+		    actions: [{ name: 'action_links text!', link: 'http://www.permadi.com' }],
+		}
+        FB.ui(data, onPostToWallCompleted);
+    }
+
+    //如果向facebook发内容成功则调用此函数，弹出消息框告诉用户发帖成功
+    function onPostToWallCompleted(response) {
+        if (response) {
+            //console.log(response);
+            if (response.error) {
+                alert(response.error.message);
+            }
+            else {
+                if (response.id)
+                    alert("Posted as post_id " + response.id);
+                else if (response.post_id)
+                    alert("Posted as post_id " + response.post_id);
+                else
+                    alert("Unknown Error");
+            }
+        }
+        // user cancelled
+    }
+
+
+
+</script>
+@* facebook登录按钮 *@
+<div id="fb-login-button-div" style="display:inherit;">
+	<input id="loginButton" type="button" value="Login To Facebook" onclick="javascript: facebookLogin();">
+</div>
+@* facebook登出按钮 *@
+<div id="fb-logout-button-div" style="display:inherit;">
+	<input id="logoutButton" type="button" value="Logout From Facebook" onclick="javascript: facebookLogout();">
+</div>
+
+<div id="user-is-authenticated-div" style="display:inherit;">
+	@*<input id="postPictureToWall" type="button" value="Post To Wall Using FB.api" onclick="javascript: postToWallUsingFBApi();">*@
+	<br>	
+	<input id="postToWallWithFBUiPromptAndAttachment" style="display:none;" type="button" value="Post To Wall Using FB.ui and Attachment Parameter" onclick="javascript: postToWallUsingFBUiAndAttachment();">
+	<input id="postToWallWithFBUiPrompt" style="display:none;" type="button" value="Post To Wall Using FB.ui The New Way" onclick="javascript: postToWallUsingFBUi();">
+</div>
+
+@* 新建商品时要提交的表格 *@
+@using (Html.BeginForm()) {
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>ProductModels</legend>
+        <script>
+            //在服务端生成随机的商品id
+            var puid = "@{ var puid = Guid.NewGuid().ToString(); @puid }";
+            //在服务端生成随机的优惠码
+            var coupon = "@{ var coupon = new Random().Next(9999); @coupon }";
+        </script>
+
+        @* 以下为要提交的商品信息表格 *@
+        <div class="editor-label" style="display:none;">
+            @Html.LabelFor(model => model.ProductId)
+        </div>
+        <div class="editor-field" style="display:none;">
+            @Html.EditorFor(model => model.ProductId, new { @Value = @puid })
+            @Html.ValidationMessageFor(model => model.ProductId)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.ProductName)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.ProductName)
+            @Html.ValidationMessageFor(model => model.ProductName)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.ProductImage)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.ProductImage)
+            @Html.ValidationMessageFor(model => model.ProductImage)
+        </div>
+        @*<input type="file" name="photo" id="photo" />*@
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.ProductPrice)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.ProductPrice)
+            @Html.ValidationMessageFor(model => model.ProductPrice)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.ProductAvailable)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.ProductAvailable)
+            @Html.ValidationMessageFor(model => model.ProductAvailable)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.ProductDetails)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.ProductDetails)
+            @Html.ValidationMessageFor(model => model.ProductDetails)
+        </div>
+        <script>
+            //将随机的商品id填入文本框
+            document.getElementById('ProductId').value = puid;
+        </script>
+        <p>
+            @* 提交表格按钮，提交表格的同时，将表格内容发到facebook *@
+            <input type="submit" value="Create" onclick="javascript: postToWallUsingFBApi(puid, coupon);" />
+        </p>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

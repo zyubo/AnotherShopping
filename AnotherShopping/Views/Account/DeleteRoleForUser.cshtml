@@ -1,0 +1,20 @@
+﻿@{
+    ViewBag.Title = "DeleteRoleForUser";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h3>Delete A User from a Role</h3>
+
+@using (Html.BeginForm("DeleteRoleForUser", "Account"))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <p>
+        Username : @Html.TextBox("UserName")
+        Role Name: @Html.DropDownList("RoleName", ViewBag.Roles as SelectList)
+        
+    </p>
+    
+    <input type="submit" value="Delete this user from Role" />
+}

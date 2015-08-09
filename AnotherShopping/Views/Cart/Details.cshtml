@@ -1,0 +1,29 @@
+﻿@model AnotherShopping.Models.CartModels
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<fieldset>
+    <legend>CartModels</legend>
+
+    <div class="display-label">
+         @Html.DisplayNameFor(model => model.ProductId)
+    </div>
+    <div class="display-field">
+        @Html.DisplayFor(model => model.ProductId)
+    </div>
+
+    <div class="display-label">
+         @Html.DisplayNameFor(model => model.UserId)
+    </div>
+    <div class="display-field">
+        @Html.DisplayFor(model => model.UserId)
+    </div>
+</fieldset>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id=Model.CartId }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>
